@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Dto\CarwashDto;
 use App\Repository\CarwashRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,9 +10,10 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+
 #[Entity(repositoryClass: CarwashRepository::class)]
 #[Table(name: '`carwash`')]
-class Carwash
+class Carwash implements \JsonSerializable
 {
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
@@ -88,5 +90,33 @@ class Carwash
         $this->services = $services;
 
         return $this;
+    }
+
+    public static function createFromDto(CarwashDto $dto): self
+    {
+        $carwash = new self();
+        $carwash->address = $dto->address;
+        $carwash->name = $dto->name;
+        return $carwash;
+    }
+
+    public function updateFromDto(CarwashDto $carwashDto): self
+    {
+
+        $this->name = $carwashDto->name == '' ? $this->name : $carwashDto->name;
+        $this->address = $carwashDto->address == '' ? $this->address : $carwashDto->address;
+
+        return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'address' => $this->address,
+            'name' => $this->name,
+            'owner' => $this->owner,
+            'services' => $this->services,
+        ];
     }
 }

@@ -10,7 +10,6 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
- * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends ServiceEntityRepository
@@ -40,11 +39,13 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
-    public function save(User $entity, bool $flush = true): void
+    public function findAll(): array
     {
-        $this->entityManager->persist($entity);
-        if ($flush) {
-            $this->entityManager->flush();
+        $users = parent::findAll();
+        foreach ($users as $user) {
+            $response[] = $user->jsonSerialize();
         }
+
+        return $response;
     }
 }

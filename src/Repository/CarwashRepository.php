@@ -7,7 +7,11 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
-
+/**
+ * @method Carwash|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Carwash|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Carwash[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 class CarwashRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $entityManager;
@@ -33,5 +37,15 @@ class CarwashRepository extends ServiceEntityRepository
         if ($flush) {
             $this->entityManager->flush();
         }
+    }
+
+    public function findAll(): array
+    {
+        $carwashes = parent::findAll();
+        foreach ($carwashes as $carwash) {
+            $response[] = $carwash->jsonSerialize();
+        }
+
+        return $response;
     }
 }

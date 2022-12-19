@@ -4,7 +4,6 @@ namespace App\Dto;
 
 use App\Entity\User;
 
-
 class UserDto
 {
     public int $id;
@@ -25,7 +24,7 @@ class UserDto
     {
         $dto = new self();
         $dto->id = $user->getId();
-        $dto->role = $user->roles;
+        $dto->roles[] = $user->roles;
         $dto->lastName = $user->lastName;
         $dto->firstName = $user->firstName;
         $dto->email = $user->email;

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Dto\AppointmentDto;
 use App\Repository\AppointmentRepository;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
@@ -9,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[Entity(repositoryClass: AppointmentRepository::class)]
 #[Table(name: '`appointment`')]
-class Appointment
+class Appointment implements \JsonSerializable
 {
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
@@ -97,5 +98,41 @@ class Appointment
         $this->service = $service;
 
         return $this;
+    }
+
+    public static function createFromDto(AppointmentDto $dto): self
+    {
+        $appointment = new self();
+        $appointment->setStartTime(\DateTime::createFromFormat('Y-m-d H:i', $dto->startTime));
+        $appointment->setEndTime(\DateTime::createFromFormat('Y-m-d H:i', $dto->endTime));
+
+        return $appointment;
+    }
+
+    public function updateFromDto(AppointmentDto $dto): self
+    {
+        $this->setStartTime(
+            $dto->startTime == '' ?
+                $this->getStartTime() :
+                \DateTime::createFromFormat('Y-m-d H:i', $dto->startTime));
+
+        $this->setEndTime(
+            $dto->endTime == '' ?
+                $this->getEndTime() :
+                \DateTime::createFromFormat('Y-m-d H:i', $dto->endTime));
+
+        return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'customerEmail' => $this->customer->email,
+            'carwashName' => $this->carwash->name,
+            'serviceDescription' => $this->service->description,
+            'startTime' => $this->startTime->format('Y-m-d H:i'),
+            'endTime' => $this->endTime->format('Y-m-d H:i'),
+        ];
     }
 }

@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: UserRepository::class)]
 #[Table(name: '`user`')]
-class User
+class User implements \JsonSerializable
 {
     public const ROLE_USER = 'ROLE_USER';
 
@@ -39,6 +39,8 @@ class User
     public string $password = '';
 
     #[ORM\Column(type: 'string', unique: 'true')]
+    #[Assert\NotBlank()]
+    #[Assert\Regex(pattern: '/^(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/')]
     public string $telephoneNr = '';
 
     #[ORM\Column(type: 'string', unique: 'true')]
@@ -79,5 +81,30 @@ class User
         $user->roles = $userDto->roles;
 
         return $user;
+    }
+
+    public function updateFromDto(UserDto $userDto): self
+    {
+
+        $this->email = $userDto->email == '' ? $this->email : $userDto->email;
+        $this->password = $userDto->password == '' ? $this->password : $userDto->password;
+        $this->telephoneNr = $userDto->telephoneNr == '' ? $this->telephoneNr : $userDto->telephoneNr;
+        $this->firstName = $userDto->firstName == '' ? $this->firstName : $userDto->firstName;
+        $this->lastName = $userDto->lastName == '' ? $this->lastName : $userDto->lastName;
+        $this->roles = $userDto->roles == [] ? $this->roles : $userDto->roles;
+
+        return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'roles' => $this->roles,
+            'telephoneNr' => $this->telephoneNr,
+            'firstName' => $this->firstName,
+            'lastName' => $this->lastName,
+        ];
     }
 }

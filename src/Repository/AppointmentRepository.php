@@ -8,7 +8,6 @@ use Doctrine\ORM\EntityManagerInterface;
 /**
  * @method Appointment|null find($id, $lockMode = null, $lockVersion = null)
  * @method Appointment|null findOneBy(array $criteria, array $orderBy = null)
- * @method Appointment[]    findAll()
  * @method Appointment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class AppointmentRepository
@@ -34,5 +33,10 @@ class AppointmentRepository
         if ($flush) {
             $this->entityManager->flush();
         }
+    }
+
+    public function findAll(): array
+    {
+        return $this->entityManager->getRepository(Appointment::class)->findAll();
     }
 }

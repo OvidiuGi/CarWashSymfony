@@ -3,21 +3,20 @@
 namespace App\Repository;
 
 use App\Entity\Carwash;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @method Carwash|null find($id, $lockMode = null, $lockVersion = null)
- * @method Carwash|null findOneBy(array $criteria, array $orderBy = null)
- * @method Carwash[]    findAll()
- * @method Carwash[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class CarwashRepository
+
+class CarwashRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $managerRegistry, EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+
+        parent::__construct($managerRegistry, Carwash::class);
     }
 
     public function add(Carwash $entity, bool $flush = true): void

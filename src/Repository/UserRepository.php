@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -11,13 +13,15 @@ use Doctrine\ORM\EntityManagerInterface;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository
+class UserRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $managerRegistry,EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+
+        parent::__construct($managerRegistry, User::class);
     }
 
     public function add(User $entity, bool $flush = true): void
@@ -31,6 +35,14 @@ class UserRepository
     public function remove(User $entity, bool $flush = true): void
     {
         $this->entityManager->remove($entity);
+        if ($flush) {
+            $this->entityManager->flush();
+        }
+    }
+
+    public function save(User $entity, bool $flush = true): void
+    {
+        $this->entityManager->persist($entity);
         if ($flush) {
             $this->entityManager->flush();
         }

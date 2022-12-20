@@ -59,7 +59,7 @@ class UserController extends AbstractController
     #[Route(path: '/{id}', name: 'user_get_by_id', methods: ['GET'])]
     public function getUserById(int $id): JsonResponse
     {
-        $user = $this->userRepository->find($id)->jsonSerialize();
+        $user = $this->userRepository->find($id);
 
         if(!$user) {
             return new JsonResponse([

@@ -18,5 +18,3 @@ COPY ./app /var/www/project
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
 CMD ["php-fpm"]
-#RUN curl -sS https://get.symfony.com/cli/installer | bash
-#RUN mv /root/.symfony/bin/symfony /usr/local/bin/symfony

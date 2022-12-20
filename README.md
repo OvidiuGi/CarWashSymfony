@@ -1,17 +1,18 @@
 # CarWashSymfony Web Application
 ## Installation
-### Requirements
-### For Windows
-* Open windows powershell
 
-Set-ExecutionPolicy RemoteSigned -SCope CurrentUser
+* Download Docker Desktop for Windows or Mac
 
-irm get.scoop.sh | iex
+* Open the repository in your favorite IDE
+* Open a terminal and run the following commands:
+    * `docker-compose up -d --build`
+    * `docker-compose exec php81-service composer install`
+    * `docker-compose exec php81-service php bin/console doctrine:migrations:migrate`
 
-Follow the steps in the documentation
+* After you build the containers, you don't need to build them again. Use the commands below.
 
-Download Symfony CLI : https://symfony.com/download
+* Commands for starting/closing the docker containers, after build.
+    * `docker-compose up -d`
+    * `docker-compose down`
 
-scoop install php
-
-scoop install composer
+* Verify if it works. Open your browser and go to `http://localhost:8080/`

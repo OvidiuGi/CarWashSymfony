@@ -116,7 +116,7 @@ class Carwash implements \JsonSerializable
             'address' => $this->address,
             'name' => $this->name,
             'owner' => $this->owner,
-            'services' => $this->services,
+            'services' => $this->services->getValues(),
         ];
     }
 }

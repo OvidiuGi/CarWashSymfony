@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route(path: '/users')]
+#[Route(path: 'api/users')]
 class UserController extends AbstractController
 {
     private UserRepository $userRepository;
@@ -27,7 +27,10 @@ class UserController extends AbstractController
     #[Route(name: 'user_getall', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        return new JsonResponse($this->userRepository->findAll(),Response::HTTP_OK);
+        return new JsonResponse([
+            'users' => array_map(fn($user) => $user->jsonSerialize() ,$this->userRepository->findAll())
+            ], Response::HTTP_OK
+        );
     }
 
     #[Route(name: 'user_add', methods: ['POST'])]
@@ -45,10 +48,14 @@ class UserController extends AbstractController
                 $errorArray[$error->getPropertyPath()] = $error->getMessage();
             }
 
-            return new JsonResponse($errorArray, Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['message' => $errorArray], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->userRepository->add($user);
+        try{
+            $this->userRepository->add($user);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
 
         return new JsonResponse([
             'message' => 'User registered',
@@ -59,26 +66,22 @@ class UserController extends AbstractController
     #[Route(path: '/{id}', name: 'user_get_by_id', methods: ['GET'])]
     public function getUserById(int $id): JsonResponse
     {
-        $user = $this->userRepository->find($id);
-
-        if(!$user) {
-            return new JsonResponse([
-                'message' => 'User not found',
-            ], Response::HTTP_NOT_FOUND);
+        try {
+            $user = $this->userRepository->findOneBy(['id' => $id]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse(UserDto::createFromUser($user), Response::HTTP_OK);
+        return new JsonResponse(['user' => UserDto::createFromUser($user)], Response::HTTP_OK);
     }
 
     #[Route(path: '/{id}', name: 'user_delete', methods: ['DELETE'])]
     public function deleteUser(int $id): JsonResponse
     {
-        $user = $this->userRepository->find($id);
-
-        if(!$user) {
-            return new JsonResponse([
-                'message' => 'User not found',
-            ], Response::HTTP_NOT_FOUND);
+        try {
+            $user = $this->userRepository->findOneBy(['id' => $id]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
         $this->userRepository->remove($user);
@@ -91,12 +94,10 @@ class UserController extends AbstractController
     #[Route(path: '/{id}', name: 'user_update', methods: ['PATCH'])]
     public function updateUser(int $id, UserDto $userDto): JsonResponse
     {
-        $user = $this->userRepository->find(['id' => $id]);
-
-        if(!$user) {
-            return new JsonResponse([
-                'message' => 'User not found',
-            ], Response::HTTP_NOT_FOUND);
+        try {
+            $user = $this->userRepository->findOneBy(['id' => $id]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
         $user->updateFromDto($userDto);

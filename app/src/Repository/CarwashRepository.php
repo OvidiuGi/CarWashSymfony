@@ -9,7 +9,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Carwash|null find($id, $lockMode = null, $lockVersion = null)
- * @method Carwash|null findOneBy(array $criteria, array $orderBy = null)
  * @method Carwash[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class CarwashRepository extends ServiceEntityRepository
@@ -43,9 +42,22 @@ class CarwashRepository extends ServiceEntityRepository
     {
         $carwashes = parent::findAll();
         foreach ($carwashes as $carwash) {
-            $response[] = $carwash->jsonSerialize();
+            $response[] = $carwash;
         }
 
         return $response;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findOneBy(array $criteria, array $orderBy = null): ?Carwash
+    {
+        $service = parent::findOneBy($criteria, $orderBy);
+        if (!$service) {
+            throw new \Exception('Carwash not found');
+        }
+
+        return $service;
     }
 }

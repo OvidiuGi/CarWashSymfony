@@ -9,7 +9,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Service|null find($id, $lockMode = null, $lockVersion = null)
- * @method Service|null findOneBy(array $criteria, array $orderBy = null)
  * @method Service[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class ServiceRepository extends ServiceEntityRepository
@@ -24,6 +23,17 @@ class ServiceRepository extends ServiceEntityRepository
     }
 
     public function add(Service $entity, bool $flush = true): void
+    {
+        if (!$this->findOneBy(['id' => $entity->getId()])) {
+            $this->entityManager->persist($entity);
+        }
+
+        if ($flush) {
+            $this->entityManager->flush();
+        }
+    }
+
+    public function update(Service $entity, bool $flush = true): void
     {
         $this->entityManager->persist($entity);
         if ($flush) {
@@ -43,9 +53,22 @@ class ServiceRepository extends ServiceEntityRepository
     {
         $services = parent::findAll();
         foreach ($services as $service) {
-            $response[] = $service->jsonSerialize();
+            $response[] = $service;
         }
 
         return $response;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findOneBy(array $criteria, array $orderBy = null): ?Service
+    {
+        $service = parent::findOneBy($criteria, $orderBy);
+        if (!$service) {
+            throw new \Exception('Service not found');
+        }
+
+        return $service;
     }
 }

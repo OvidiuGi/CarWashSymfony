@@ -9,7 +9,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
- * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends ServiceEntityRepository
@@ -43,9 +42,23 @@ class UserRepository extends ServiceEntityRepository
     {
         $users = parent::findAll();
         foreach ($users as $user) {
-            $response[] = $user->jsonSerialize();
+            $response[] = $user;
         }
 
         return $response;
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function findOneBy(array $criteria, array $orderBy = null): ?User
+    {
+        $user = parent::findOneBy($criteria, $orderBy);
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
+
+        return $user;
     }
 }

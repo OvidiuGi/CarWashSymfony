@@ -9,7 +9,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Appointment|null find($id, $lockMode = null, $lockVersion = null)
- * @method Appointment|null findOneBy(array $criteria, array $orderBy = null)
  * @method Appointment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class AppointmentRepository extends ServiceEntityRepository
@@ -47,5 +46,18 @@ class AppointmentRepository extends ServiceEntityRepository
         }
 
         return $response;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findOneBy(array $criteria, array $orderBy = null): ?Appointment
+    {
+        $appointment = parent::findOneBy($criteria, $orderBy);
+        if (!$appointment) {
+            throw new \Exception('Appointment not found');
+        }
+
+        return $appointment;
     }
 }

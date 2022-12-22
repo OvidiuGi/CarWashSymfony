@@ -39,16 +39,19 @@ class CarwashController extends AbstractController
     #[Route(name: 'carwash_getall', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        return new JsonResponse($this->carwashRepository->findAll(),Response::HTTP_OK);
+        return new JsonResponse([
+            'carwashes' => array_map(fn($carwash) => $carwash->jsonSerialize() ,$this->carwashRepository->findAll())
+        ], Response::HTTP_OK
+        );
     }
 
     #[Route(path: '/{id}', name: 'carwash_get_by_id', methods: ['GET'])]
     public function getCarwashById(int $id): JsonResponse
     {
-        $carwash = $this->carwashRepository->find($id)->jsonSerialize();
-
-        if($carwash === null) {
-            return new JsonResponse(['message' => 'Carwash not found'], Response::HTTP_NOT_FOUND);
+        try {
+            $carwash = $this->carwashRepository->findOneBy(['id' => $id]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
         return new JsonResponse($carwash, Response::HTTP_OK);
@@ -57,32 +60,36 @@ class CarwashController extends AbstractController
     #[Route(name: 'carwash_add', methods: ['POST'])]
     public function addCarwash(CarwashDto $carwashDto): JsonResponse
     {
-        $carwash = Carwash::createFromDto($carwashDto);
-        foreach ($carwashDto->serviceId as $serviceId) {
-            $service = $this->serviceRepository->find($serviceId);
-            if($service === null) {
-                return new JsonResponse(['message' => 'Service not found'], Response::HTTP_NOT_FOUND);
-            }
-            $carwash->addService($service);
-        }
+        try{
+            $carwash = Carwash::createFromDto($carwashDto);
 
-        $carwash->setOwner($this->userRepository->findOneBy(['email' => $carwashDto->ownerEmail]));
+            foreach ($carwashDto->serviceId as $serviceId) {
+                $service = $this->serviceRepository->findOneBy(['id' => $serviceId]);
 
-        $errors = $this->validator->validate($carwash);
-
-        if(\count($errors) > 0) {
-            $errorArray = [];
-            foreach ($errors as $error) {
-                /*
-                 * @var ConstraintViolation $error
-                 */
-                $errorArray[$error->getPropertyPath()] = $error->getMessage();
+                $carwash->addService($service);
             }
 
-            return new JsonResponse($errorArray, Response::HTTP_BAD_REQUEST);
-        }
+            $carwash->setOwner($this->userRepository->findOneBy(['email' => $carwashDto->ownerEmail]));
 
-        $this->carwashRepository->add($carwash);
+            $errors = $this->validator->validate($carwash);
+
+            if(\count($errors) > 0) {
+                $errorArray = [];
+                foreach ($errors as $error) {
+                    /*
+                     * @var ConstraintViolation $error
+                     */
+                    $errorArray[$error->getPropertyPath()] = $error->getMessage();
+                }
+
+                throw new \Exception(json_encode($errorArray));
+            }
+
+            $this->carwashRepository->add($carwash);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
 
         return new JsonResponse([
             'message' => 'Carwash added',
@@ -93,9 +100,12 @@ class CarwashController extends AbstractController
     #[Route(path: '/{id}', name: 'carwash_delete', methods: ['DELETE'])]
     public function deleteCarwash(int $id): JsonResponse
     {
-        $carwash = $this->carwashRepository->find($id);
-        if($carwash === null) {
-            return new JsonResponse(['message' => 'Carwash not found'], Response::HTTP_NOT_FOUND);
+        try {
+            $carwash = $this->carwashRepository->findOneBy(['id' => $id]);
+
+            $this->carwashRepository->remove($carwash);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
         $this->carwashRepository->remove($carwash);
@@ -106,15 +116,16 @@ class CarwashController extends AbstractController
     #[Route(path: '/{id}', name: 'carwash_update', methods: ['PATCH'])]
     public function updateCarwash(int $id, CarwashDto $carwashDto): JsonResponse
     {
-        $carwash = $this->carwashRepository->find($id);
+        try {
+            $carwash = $this->carwashRepository->findOneBy(['id' => $id]);
 
-        if($carwash === null) {
-            return new JsonResponse(['message' => 'Carwash not found'], Response::HTTP_NOT_FOUND);
-        }
-        $carwash->updateFromDto($carwashDto);
+            $carwash->updateFromDto($carwashDto);
 
-        if ($carwashDto->ownerEmail !== $carwash->getOwner()->email && $carwashDto->ownerEmail !== '') {
-            $carwash->setOwner($this->userRepository->findOneBy(['email' => $carwashDto->ownerEmail]));
+            if ($carwashDto->ownerEmail !== $carwash->getOwner()->email && $carwashDto->ownerEmail !== '') {
+                $carwash->setOwner($this->userRepository->findOneBy(['email' => $carwashDto->ownerEmail]));
+            }
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
         $errors = $this->validator->validate($carwash);

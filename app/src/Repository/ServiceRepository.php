@@ -49,11 +49,18 @@ class ServiceRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function findAll(): array
     {
         $services = parent::findAll();
         foreach ($services as $service) {
             $response[] = $service;
+        }
+
+        if (empty($response)) {
+            throw new \Exception('Services not found');
         }
 
         return $response;

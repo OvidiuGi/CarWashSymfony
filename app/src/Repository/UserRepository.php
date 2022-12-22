@@ -38,11 +38,18 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function findAll(): array
     {
         $users = parent::findAll();
         foreach ($users as $user) {
             $response[] = $user;
+        }
+
+        if (empty($response)) {
+            throw new \Exception('Users not found');
         }
 
         return $response;

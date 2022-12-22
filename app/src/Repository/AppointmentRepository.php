@@ -38,11 +38,19 @@ class AppointmentRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function findAll(): array
     {
         $appointments = parent::findAll();
         foreach ($appointments as $appointment) {
             $response[] = $appointment->jsonSerialize();
+        }
+
+
+        if (empty($response)) {
+            throw new \Exception('Appointments not found');
         }
 
         return $response;

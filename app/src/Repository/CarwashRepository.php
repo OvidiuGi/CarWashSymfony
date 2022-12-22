@@ -38,6 +38,9 @@ class CarwashRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function findAll(): array
     {
         $carwashes = parent::findAll();
@@ -45,6 +48,9 @@ class CarwashRepository extends ServiceEntityRepository
             $response[] = $carwash;
         }
 
+        if (empty($response)) {
+            throw new \Exception('Carwashes not found');
+        }
         return $response;
     }
 

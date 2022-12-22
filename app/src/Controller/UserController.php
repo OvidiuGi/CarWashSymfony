@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route(path: 'api/users')]
+#[Route(path: '/users')]
 class UserController extends AbstractController
 {
     private UserRepository $userRepository;

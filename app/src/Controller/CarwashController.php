@@ -39,10 +39,15 @@ class CarwashController extends AbstractController
     #[Route(name: 'carwash_getall', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        return new JsonResponse([
-            'carwashes' => array_map(fn($carwash) => $carwash->jsonSerialize() ,$this->carwashRepository->findAll())
-        ], Response::HTTP_OK
-        );
+        try{
+            return new JsonResponse([
+                'carwashes' => array_map(fn($carwash) => $carwash->jsonSerialize() ,$this->carwashRepository->findAll())
+            ], Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
+
     }
 
     #[Route(path: '/{id}', name: 'carwash_get_by_id', methods: ['GET'])]

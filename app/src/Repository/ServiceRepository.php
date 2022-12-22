@@ -24,10 +24,7 @@ class ServiceRepository extends ServiceEntityRepository
 
     public function add(Service $entity, bool $flush = true): void
     {
-        if (!$this->findOneBy(['id' => $entity->getId()])) {
-            $this->entityManager->persist($entity);
-        }
-
+        $this->entityManager->persist($entity);
         if ($flush) {
             $this->entityManager->flush();
         }

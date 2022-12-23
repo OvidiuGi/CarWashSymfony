@@ -45,12 +45,12 @@ class AppointmentRepository extends ServiceEntityRepository
     {
         $appointments = parent::findAll();
         foreach ($appointments as $appointment) {
-            $response[] = $appointment->jsonSerialize();
+            $response[] = $appointment;
         }
 
 
         if (empty($response)) {
-            throw new \Exception('Appointments not found');
+            throw new \Exception(['message' => 'Appointments not found']);
         }
 
         return $response;

@@ -3,6 +3,10 @@
 
 * Download Docker Desktop for Windows or Mac
 
+* Clone the frontend repository in the 'frontend' folder
+* Make sure the structure is frontend/(node_modules, public, src, package.json, package-lock.json, README.md)
+* And not frontend/CarWashWebApp-Frontend
+* Inside the frontend folder, run `npm install`
 * Open the repository in your favorite IDE
 * Open a terminal and run the following commands:
     * `docker-compose up -d --build`

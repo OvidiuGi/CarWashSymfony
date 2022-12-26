@@ -44,11 +44,15 @@ class AppointmentController extends AbstractController
     #[Route(name: 'appointment_getall', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        return new JsonResponse([
-            'appointments' =>
-            array_map(fn($appointment) =>$appointment->jsonSerialize() ,$this->appointmentRepository->findAll())
-        ], Response::HTTP_OK
-        );
+        try {
+            return new JsonResponse([
+                'appointments' =>
+                    array_map(fn($appointment) =>$appointment->jsonSerialize() ,$this->appointmentRepository->findAll())
+            ], Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
     }
 
     #[Route(path: '/{id}', name: 'appointment_get_by_id', methods: ['GET'])]

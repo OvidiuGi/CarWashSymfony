@@ -50,7 +50,7 @@ class AppointmentRepository extends ServiceEntityRepository
 
 
         if (empty($response)) {
-            throw new \Exception(['message' => 'Appointments not found']);
+            throw new \Exception('Appointments not found');
         }
 
         return $response;

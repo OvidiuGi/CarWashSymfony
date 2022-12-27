@@ -24,11 +24,11 @@ class UserDto
     {
         $dto = new self();
         $dto->id = $user->getId();
-        $dto->roles[] = $user->roles;
+        $dto->roles[] = $user->getRoles();
         $dto->lastName = $user->lastName;
         $dto->firstName = $user->firstName;
         $dto->email = $user->email;
-        $dto->password = $user->password;
+//        $dto->password = $user->password;
         $dto->telephoneNr = $user->telephoneNr;
 
         return $dto;

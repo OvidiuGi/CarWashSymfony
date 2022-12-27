@@ -7,11 +7,13 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: UserRepository::class)]
 #[Table(name: '`user`')]
-class User implements \JsonSerializable
+class User implements \JsonSerializable, UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE_USER = 'ROLE_USER';
 
@@ -32,11 +34,13 @@ class User implements \JsonSerializable
 
     #[ORM\Column(type: 'json')]
     #[Assert\Choice(choices: User::ROLES, multiple: true)]
-    public array $roles = [];
+    private array $roles;
 
     #[ORM\Column(type: 'string')]
-    #[Assert\Regex(pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/')]
+//    #[Assert\Regex(pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/')]
     public string $password = '';
+
+    public string $plainPassword = '';
 
     #[ORM\Column(type: 'string', unique: 'true')]
     #[Assert\NotBlank()]
@@ -74,7 +78,7 @@ class User implements \JsonSerializable
     {
         $user = new self();
         $user->email = $userDto->email;
-        $user->password = $userDto->password;
+        $user->plainPassword = $userDto->password;
         $user->telephoneNr = $userDto->telephoneNr;
         $user->firstName = $userDto->firstName;
         $user->lastName = $userDto->lastName;
@@ -106,5 +110,31 @@ class User implements \JsonSerializable
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
         ];
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = self::ROLE_USER;
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
 }

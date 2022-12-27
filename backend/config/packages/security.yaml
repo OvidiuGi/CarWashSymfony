@@ -1,29 +1,42 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_CARWASH_OWNER
+        ROLE_CARWASH_OWNER: ROLE_USER
+
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+            logout:
+                path: app_logout
+                target: app_login
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+         - { path: ^/login, roles: PUBLIC_ACCESS }
+         - { path: ^/carwashes, roles: PUBLIC_ACCESS, methods:[GET] }
+         - { path: ^/carwashes, roles: ROLE_CARWASH_OWNER, methods:[POST, PATCH, DELETE] }
+         - { path: ^/services, roles: PUBLIC_ACCESS, methods:[GET] }
+         - { path: ^/services, roles: ROLE_CARWASH_OWNER, methods:[POST, PATCH, DELETE] }
+         - { path: ^/appointments, roles: ROLE_USER, methods:[GET, POST, PATCH, DELETE] }
+         - { path: ^/users, roles: ROLE_ADMIN, methods:[GET, PATCH, DELETE] }
+         - { path: ^/users, roles: PUBLIC_ACCESS, methods:[POST] }
 
 when@test:
     security:

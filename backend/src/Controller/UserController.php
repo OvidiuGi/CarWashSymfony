@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 #[Route(path: '/users')]
 class UserController extends AbstractController
@@ -18,10 +20,13 @@ class UserController extends AbstractController
 
     private ValidatorInterface $validator;
 
-    public function __construct(UserRepository $userRepository, ValidatorInterface $validator)
+    private UserPasswordHasherInterface $passwordHasher;
+
+    public function __construct(UserRepository $userRepository, ValidatorInterface $validator, UserPasswordHasherInterface $passwordHasher)
     {
         $this->userRepository = $userRepository;
         $this->validator = $validator;
+        $this->passwordHasher = $passwordHasher;
     }
 
     #[Route(name: 'user_getall', methods: ['GET'])]
@@ -37,6 +42,7 @@ class UserController extends AbstractController
     public function addUser(UserDto $userDto): JsonResponse
     {
         $user = User::createFromDto($userDto);
+        $user->setPassword($this->passwordHasher->hashPassword($user, $user->plainPassword));
 
         $errors = $this->validator->validate($user);
         if(\count($errors) > 0) {

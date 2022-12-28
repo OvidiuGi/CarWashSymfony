@@ -2,21 +2,42 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app_login', methods: ['GET', 'POST'])]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    private UserRepository $userRepository;
+
+    private UserPasswordHasherInterface $passwordHasher;
+
+    public function __construct(UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher)
     {
-        $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
-        return $this->render('admin/login/index.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
+        $this->userRepository = $userRepository;
+        $this->passwordHasher = $passwordHasher;
+    }
+
+    #[Route(path: '/login', name: 'app_login', methods: ['POST'])]
+    public function index(Request $request): Response
+    {
+        try {
+            $user = $this->userRepository->findOneBy(['email' => $request->toArray()['email']]);
+        } catch (\Exception $e) {
+            return new Response('User not found', Response::HTTP_NOT_FOUND);
+        }
+
+        if($this->passwordHasher->isPasswordValid($user, $request->toArray()['password'])) {
+            return new JsonResponse(['status' => 'success', 'role' => $user->getRoles()[0]], Response::HTTP_OK);
+        }
+
+        return $this->json([
+            'status' => 'failed',
+            'role' => '',
         ]);
     }
 }

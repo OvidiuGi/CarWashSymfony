@@ -32,12 +32,17 @@ class LoginController extends AbstractController
         }
 
         if($this->passwordHasher->isPasswordValid($user, $request->toArray()['password'])) {
-            return new JsonResponse(['status' => 'success', 'role' => $user->getRoles()[0]], Response::HTTP_OK);
+            return new JsonResponse([
+                'status' => 'success',
+                'role' => $user->getRoles()[0],
+                'id' => $user->getId()
+            ], Response::HTTP_OK);
         }
 
         return $this->json([
             'status' => 'failed',
             'role' => '',
+            'id' => $user->getId()
         ]);
     }
 }

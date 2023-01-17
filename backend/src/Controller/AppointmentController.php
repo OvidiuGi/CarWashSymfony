@@ -163,4 +163,16 @@ class AppointmentController extends AbstractController
             'appointment' => AppointmentDto::createFromAppointment($appointment),
         ], Response::HTTP_OK);
     }
+
+    #[Route(path: '/customer/{id}', name: 'appointment_by_customer', methods: ['GET'])]
+    public function getByUserId(int $id): JsonResponse
+    {
+        try {
+            $appointments = $this->appointmentRepository->findBy(['customer' => $id]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse($appointments, Response::HTTP_OK);
+    }
 }

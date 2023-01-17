@@ -19,4 +19,4 @@
     * `docker-compose up -d`
     * `docker-compose down`
 
-* Verify if it works. Open your browser and go to `http://localhost:8080/`
+* Verify if it works. Open your browser and go to `http://localhost:8080/`, `http://localhost:3000`

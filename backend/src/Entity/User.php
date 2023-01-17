@@ -37,9 +37,9 @@ class User implements \JsonSerializable, UserInterface, PasswordAuthenticatedUse
     private array $roles;
 
     #[ORM\Column(type: 'string')]
-//    #[Assert\Regex(pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/')]
     public string $password = '';
 
+    #[Assert\Regex(pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/')]
     public string $plainPassword = '';
 
     #[ORM\Column(type: 'string', unique: 'true')]
@@ -47,12 +47,12 @@ class User implements \JsonSerializable, UserInterface, PasswordAuthenticatedUse
     #[Assert\Regex(pattern: '/^(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/')]
     public string $telephoneNr = '';
 
-    #[ORM\Column(type: 'string', unique: 'true')]
+    #[ORM\Column(type: 'string', unique: 'false')]
     #[Assert\NotBlank()]
     #[Assert\Regex("/^[A-Z][a-z]+$/")]
     public string $firstName = '';
 
-    #[ORM\Column(type: 'string', unique: 'true')]
+    #[ORM\Column(type: 'string', unique: 'false')]
     #[Assert\NotBlank()]
     #[Assert\Regex("/^[A-Z][a-z]+$/")]
     public string $lastName = '';

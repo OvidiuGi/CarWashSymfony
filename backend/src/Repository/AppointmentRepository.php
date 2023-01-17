@@ -68,4 +68,27 @@ class AppointmentRepository extends ServiceEntityRepository
 
         return $appointment;
     }
+
+    public function findAppointmentsByCarwashId(int $carwashId): array
+    {
+        $result = [];
+        $appointments = $this->entityManager
+            ->createQueryBuilder()
+            ->select('a')
+            ->from('App\Entity\Appointment', 'a')
+            ->where('a.carwash = :carwash')
+            ->setParameter('carwash', $carwashId)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($appointments as $appointment) {
+            $result[] = [
+                'id' => $appointment->getId(),
+                'startTime' => $appointment->getStartTime()->format('Y-m-d H:i'),
+                'endTime' => $appointment->getEndTime()->format('Y-m-d H:i')
+            ];
+        }
+
+        return $result;
+    }
 }

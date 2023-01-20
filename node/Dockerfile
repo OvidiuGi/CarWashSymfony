@@ -4,7 +4,8 @@ WORKDIR /var/www/project
 
 COPY ./frontend .
 
-RUN chmod 777 /var/www/project/node_modules
-RUN chmod -R 777 /var/www/project/node_modules/*
+RUN npm install -g npm@9.3.1
+
+RUN npm install
 
 CMD [ "npm", "start" ]

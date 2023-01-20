@@ -72,7 +72,9 @@ class AppointmentController extends AbstractController
     {
         try {
             $appointment = Appointment::createFromDto($appointmentDto);
-            $appointments = $this->appointmentRepository->findAppointmentsByCarwashId(2);
+            $id = $this->carwashRepository->findOneBy(['name' => $appointmentDto->carwashName])->getId();
+            $appointments = $this->appointmentRepository->findAppointmentsByCarwashId($id);
+
             foreach ($appointments as $a) {
                 if ($appointmentDto->startTime >= $a['startTime'] && $appointmentDto->endTime <= $a['endTime']) {
                     return new JsonResponse(['message' => 'Carwash is not available at this time'], Response::HTTP_BAD_REQUEST);
